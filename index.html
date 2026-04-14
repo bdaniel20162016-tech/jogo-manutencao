@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Revisao da Manutencao</title>
+
+<style>
+*{
+box-sizing:border-box;
+}
+
+body{
+font-family: Arial, sans-serif;
+background:#0d1b2a;
+color:white;
+margin:0;
+padding:10px;
+text-align:center;
+-webkit-tap-highlight-color: transparent;
+}
+
+.box{
+max-width:500px;
+margin:auto;
+background:#1b263b;
+padding:15px;
+border-radius:12px;
+}
+
+h2{font-size:20px;margin:10px 0;}
+h3{font-size:18px;}
+
+#prog{
+font-size:14px;
+opacity:0.8;
+}
+
+button{
+width:100%;
+padding:16px;
+margin:6px 0;
+font-size:18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+touch-action: manipulation;
+}
+
+.opt{background:#415a77;color:white;}
+.ok{background:#2ecc71!important;}
+.err{background:#e74c3c!important;}
+
+#restart{
+background:#f39c12;
+margin-top:10px;
+}
+
+button:active{
+transform:scale(0.97);
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h2>🔧 Revisao da Manutencao</h2>
+
+<p id="prog"></p>
+<h3 id="q">Carregando...</h3>
+
+<div id="a"></div>
+
+<h3 id="score">Pontuacao: 0</h3>
+
+<button id="restart">🔄 Reiniciar</button>
+
+</div>
+
+<script>
+
+// 🔥 BANCO COMPLETO
+const perguntas = [
+{p:"Qual e a funcao de um parafuso?",a:["Medir pressao","Unir pecas","Reduzir atrito","Gerar energia"],c:1},
+{p:"O que e manutencao preventiva?",a:["Consertar apos quebrar","Limpar apenas","Evitar falhas antes que ocorram","Trocar pecas aleatoriamente"],c:2},
+{p:"Qual destes e um elemento de maquina?",a:["Agua","Engrenagem","Luz","Calor"],c:1},
+{p:"Para que serve um rolamento?",a:["Aumentar peso","Diminuir atrito","Produzir calor","Medir forca"],c:1},
+{p:"O que uma bomba hidraulica faz?",a:["Esfria o motor","Move liquidos","Produz energia eletrica","Gera vento"],c:1},
+{p:"Qual material e mais resistente em geral?",a:["Plastico","Borracha","Aco","Papel"],c:2},
+{p:"O que significa lubrificar uma maquina?",a:["Pintar","Esfriar","Aplicar oleo ou graxa","Apertar parafusos"],c:2},
+{p:"Qual e a funcao de uma engrenagem?",a:["Armazenar energia","Transmitir movimento","Medir temperatura","Filtrar liquidos"],c:1},
+{p:"O que pode acontecer sem manutencao?",a:["Aumenta eficiencia","Diminui desgaste","Quebra maquina","Melhora desempenho"],c:2},
+{p:"Qual destes e um tipo de bomba?",a:["Centrifuga","Solar","Domestica","Termica"],c:0},
+
+{p:"O ferro e um tipo de:",a:["Plastico","Metal","Liquido","Gas"],c:1},
+{p:"O que e inspecao?",a:["Quebrar pecas","Verificar condicoes","Jogar fora","Trocar tudo"],c:1},
+{p:"Ferramenta para parafuso:",a:["Martelo","Chave de fenda","Alicate","Serra"],c:1},
+{p:"Correia serve para:",a:["Iluminar","Transmitir movimento","Resfriar","Limpar"],c:1},
+{p:"Material flexivel:",a:["Vidro","Aco","Borracha","Pedra"],c:2},
+{p:"Ferramenta de medir:",a:["Regua","Martelo","Chave","Furadeira"],c:0},
+{p:"Motor faz:",a:["Armazenar agua","Gerar movimento","Produzir luz","Medir pressao"],c:1},
+{p:"Manutencao corretiva:",a:["Evitar falha","Consertar depois","Limpar","Pintar"],c:1},
+{p:"Reduz atrito:",a:["Areia","Oleo","Pedra","Madeira"],c:1},
+{p:"Porca serve para:",a:["Cortar","Fixar","Medir","Aquecer"],c:1},
+
+{p:"Material que enferruja:",a:["Plastico","Vidro","Ferro","Borracha"],c:2},
+{p:"Desgaste e:",a:["Aumento","Perda de material","Ganho","Cor"],c:1},
+{p:"Chave inglesa:",a:["Cortar","Apertar porcas","Pintar","Medir"],c:1},
+{p:"Fluido e:",a:["Pedra","Ar","Ferro","Madeira"],c:1},
+{p:"Filtro serve para:",a:["Aquecer","Limpar impurezas","Aumentar peso","Gerar energia"],c:1},
+{p:"Material duro:",a:["Borracha","Esponja","Aco","Tecido"],c:2},
+{p:"Vibracao e:",a:["Parado","Movimento repetido","Sem movimento","Quebra"],c:1},
+{p:"Engrenagem:",a:["Contato direto","Correia","Cabo","Mola"],c:0},
+{p:"Objetivo da manutencao:",a:["Aumentar falhas","Garantir funcionamento","Parar maquinas","Reduzir vida"],c:1},
+{p:"Bomba submersa:",a:["Ar","Fora da agua","Dentro da agua","Sem energia"],c:2}
+];
+
+let i=0;
+let score=0;
+let atual=[];
+
+// 🔥 embaralhamento correto
+function shuffle(arr){
+for(let j=arr.length-1;j>0;j--){
+let k=Math.floor(Math.random()*(j+1));
+[arr[j],arr[k]]=[arr[k],arr[j]];
+}
+return arr;
+}
+
+function start(){
+i=0;
+score=0;
+atual = shuffle([...perguntas]).slice(0,15);
+render();
+}
+
+function render(){
+
+if(i>=atual.length){
+document.getElementById("q").innerText="🏁 Fim! Pontuacao: "+score;
+document.getElementById("a").innerHTML="";
+document.getElementById("prog").innerText="";
+return;
+}
+
+let p = atual[i];
+
+document.getElementById("prog").innerText=(i+1)+" / "+atual.length;
+document.getElementById("q").innerText=p.p;
+
+let html="";
+
+for(let idx=0; idx<p.a.length; idx++){
+html += `<button class="opt" data-id="${idx}">${p.a[idx]}</button>`;
+}
+
+document.getElementById("a").innerHTML = html;
+
+let botoes = document.querySelectorAll(".opt");
+
+botoes.forEach(btn=>{
+btn.addEventListener("click", responder, {once:true});
+});
+}
+
+function responder(e){
+
+let escolha = Number(e.target.dataset.id);
+let p = atual[i];
+
+let botoes = document.querySelectorAll(".opt");
+
+botoes.forEach((b,idx)=>{
+b.disabled=true;
+if(idx===p.c) b.classList.add("ok");
+else b.classList.add("err");
+});
+
+if(escolha===p.c) score+=100;
+
+document.getElementById("score").innerText="Pontuacao: "+score;
+
+setTimeout(()=>{
+i++;
+render();
+},600);
+}
+
+document.getElementById("restart").addEventListener("click", start);
+
+// inicia automaticamente
+start();
+
+</script>
+
+</body>
+</html>
